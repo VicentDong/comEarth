@@ -1,32 +1,67 @@
 import {
-  MeshStandardMaterial,
-  PointsMaterial,
-  MeshPhongMaterial,
-  DoubleSide,
   MeshBasicMaterial,
+  PointsMaterial,
+  FrontSide,
+  DoubleSide,
+  AdditiveBlending,
 } from 'three';
 class material {
   constructor() {}
-  createGlobeMat(texture) {
-    let mat = new MeshStandardMaterial({
-      map: texture,
+  createGlobeMat() {
+    let mat = new MeshBasicMaterial({
+      color: 0x8e8e8e,
     });
     return mat;
   }
-  createBallBoxMat(){
+  createGlobeParticlesMat(texture) {
+    let mat = new PointsMaterial({
+      size: 5,
+      color: 0x208be6,
+      map: texture,
+      depthWrite: false,
+      transparent: true,
+      opacity: 1,
+      side: FrontSide,
+      blending: AdditiveBlending,
+    });
+    return mat;
+  }
+  createBallBoxMat() {
     let mat = new MeshBasicMaterial({
-      wireframe:true,
-      transparent:true,
-      color:0x356dea
+      wireframe: true,
+      transparent: true,
+      depthTest: false,
+      color: 0x268de4,
+      opacity: 0.3,
     });
     return mat;
   }
   createNameMarkerMat() {
     var nameMarkerMaterial = new MeshBasicMaterial({
-      color: '#fff',
-      transparent: true, 
+      color: 0xffffff,
+      transparent: true,
     });
     return nameMarkerMaterial;
+  }
+  createShinePointsMat(texture) {
+    var material = new PointsMaterial({
+      color: 0x268de4,
+      size: 40,
+      map: texture,
+      depthWrite: false,
+      transparent: true,
+      opacity: 1,
+      side: FrontSide,
+      blending: AdditiveBlending,
+    });
+    return material;
+  }
+  createImgMarkerMat(texture) {
+    var material = new MeshBasicMaterial({
+      map: texture,
+      side: DoubleSide,
+    });
+    return material;
   }
 }
 

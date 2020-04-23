@@ -7,9 +7,9 @@ const copyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = {
   entry: './src/index.js',
   output: {
-    filename: 'VDEarth.js',
+    filename: 'ComEarth.js',
     path: path.resolve(__dirname, 'dist'),
-    library: 'VDEarth',
+    library: 'ComEarth',
     libraryTarget: 'umd',
     umdNamedDefine: true,
   },

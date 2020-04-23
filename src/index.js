@@ -1,6 +1,6 @@
-import VDEarth from './VDEarth';
+import ComEarth from './comEarth';
 
-var myVDEarth = new VDEarth();
+var comEarth = new ComEarth();
 export function init(opt) {
-  return myVDEarth.init(opt);
+  return comEarth.init(opt);
 }

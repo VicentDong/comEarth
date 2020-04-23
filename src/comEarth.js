@@ -5,13 +5,15 @@ import {
   TextureLoader,
   AmbientLight,
   Group,
-  FontLoader,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import _ from 'lodash';
 import model from './model';
-import marker from './markers';
+import markers from './markers';
 import './images/world.jpg';
+import './images/dot.png';
+import './images/shine.png';
+import './images/fire.png';
 
 // 初始化渲染器
 function initRenderer() {
@@ -33,7 +35,7 @@ function initCamera() {
   this.camera.up.z = 0;
   this.camera.position.x = 0;
   this.camera.position.y = 0;
-  this.camera.position.z = 500;
+  this.camera.position.z = 1000;
   this.camera.lookAt(0, 0, 0);
 }
 
@@ -66,11 +68,8 @@ function render() {
 // 盘旋控制器
 function initControls() {
   this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-  // 如果使用animate方法时，将此函数删除
   // 使动画循环使用时阻尼或自转 意思是否有惯性
   this.controls.enableDamping = true;
-  //动态阻尼系数 就是鼠标拖拽旋转灵敏度
-  //controls.dampingFactor = 0.25;
   //是否可以缩放
   this.controls.enableZoom = true;
   //是否自动旋转
@@ -88,30 +87,58 @@ function initControls() {
 // 创建对象
 function initObj() {
   let self = this;
-  let fontloader = new FontLoader();
   // 创建地球模型组
   this.baseGroup = new Group();
+  // 球体
+  let globelParticles = new model().createGlobeParticles(
+    200, // 半径
+    250, // 分割数
+    this.earthImg,
+    this.dotTexture
+  );
+  this.baseGroup.add(globelParticles);
 
-  // 创建外层光球
-  let ballBoxModel = new model().createBallBox(250)
-  this.baseGroup.add(ballBoxModel)
+  // 外球体
+  let ballBox = new model().createBallBox(250);
+  this.baseGroup.add(ballBox);
 
-  // 创建地球
-  let globe = new model().createGlobe(200,this.textrue);
-  this.baseGroup.add(globe);
+  // 外球亮点
+  let shinePoints = new model().createShinePoints(
+    ballBox.geometry,
+    this.shineTexture,
+    30
+  );
+  this.baseGroup.add(shinePoints);
 
-  let globeParticles = new model().createGlobeParticles();
-  this.baseGroup.add(globe);
- 
-  self.markerGroup = new Group();
-  // 创建标记
-  var myMarkers = new marker();
+  // 标注组
+  this.markerGroup = new Group();
+  // 标注
+  let myMarkers = new markers();
 
-  self.baseGroup.add(self.markerGroup);
+  myMarkers.addImgMarkers(
+    self.markerGroup,
+    self.markerTextrue,
+    self.options.markerData,
+    // 标注大小
+    10,
+    // 标注半径
+    200
+  );
+
+  this.baseGroup.add(this.markerGroup);
   this.scene.add(this.baseGroup);
 }
 
-class VDEarth {
+function computeImgData(ele) {
+  let canvas = document.createElement('canvas');
+  let ctx = canvas.getContext('2d');
+  canvas.width = ele.width;
+  canvas.height = ele.height;
+  ctx.drawImage(ele, 0, 0, ele.width, ele.height);
+  // 图片高度
+  this.earthImg = ctx.getImageData(0, 0, ele.width, ele.height);
+}
+class ComEarth {
   constructor() {
     this.scene = null;
     this.camera = null;
@@ -122,22 +149,29 @@ class VDEarth {
     this.controls = null;
     this.contentWidth = 0;
     this.contentHeight = 0;
-    
+    this.positions = [];
+    this.sizes = [];
+    this.earthImgPath = './images/world.jpg';
+    this.dotTexture = new TextureLoader().load('./images/dot.png');
+    this.shineTexture = new TextureLoader().load('./images/shine.png');
+    this.markerTextrue = new TextureLoader().load('./images/fire.png');
     this.options = {
       container: document.querySelector('#vdEarth'),
+      markerData: [],
     };
   }
   init(opt = {}) {
     _.merge(this.options, opt);
 
     var self = this;
-
+    // 内容高度
     this.contentWidth = this.options.container.offsetWidth;
     this.contentHeight = this.options.container.offsetHeight;
-    // 加载贴图
-    let globeTextureLoader = new TextureLoader();
-    globeTextureLoader.load('./images/world.jpg', function (textrue) {
-      self.textrue = textrue;
+
+    var earthSrcImgEle = document.createElement('img');
+    earthSrcImgEle.src = this.earthImgPath;
+    earthSrcImgEle.onload = () => {
+      computeImgData.call(self, earthSrcImgEle);
       initRenderer.call(self);
       initScene.call(self);
       initCamera.call(self);
@@ -145,8 +179,8 @@ class VDEarth {
       initControls.call(self);
       initObj.call(self);
       animate.call(self);
-    });
+    };
   }
 }
 
-export default VDEarth;
+export default ComEarth;
